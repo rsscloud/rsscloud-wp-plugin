@@ -1,0 +1,28 @@
+{
+  "name": "rsscloud",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Adds RSSCloud capabilities to your RSS feed.",
+  "author": "The WordPress Contributors",
+  "license": "GPL-2.0-or-later",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "scripts": {
+    "preformat:php": "npm run other:update-packages:php",
+    "format:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer run-script format",
+    "prelint:php": "npm run other:update-packages:php",
+    "lint:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer run-script lint",
+    "other:update-packages:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer update --no-interaction",
+    "test:php": "npm-run-all lint:php test:unit:php",
+    "test:unit:php:setup": "wp-env --config .wp-env.test.json start",
+    "test:unit:php:setup:debug": "wp-env --config .wp-env.test.json start --xdebug",
+    "test:unit:php:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose",
+    "test:unit:php": "npm-run-all test:unit:php:setup test:unit:php:base",
+    "test:unit:php:debug": "npm-run-all test:unit:php:setup:debug test:unit:php:base"
+  }
+}

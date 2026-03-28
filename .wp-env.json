@@ -1,0 +1,8 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "testsEnvironment": false,
+  "core": "WordPress/WordPress#6.3",
+  "plugins": ["."],
+  "phpVersion": "7.4",
+  "phpmyadminPort": 9000
+}

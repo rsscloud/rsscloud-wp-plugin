@@ -1,0 +1,31 @@
+{
+  "name": "wordpress/rsscloud",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "description": "Adds RSSCloud capabilities to your RSS feed.",
+  "config": {
+    "process-timeout": 0,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "composer/installers": true
+    },
+    "lock": false
+  },
+  "require-dev": {
+    "phpcompatibility/phpcompatibility-wp": "^2.1.3",
+    "wp-coding-standards/wpcs": "^3.0",
+    "sirbrillig/phpcs-variable-analysis": "^2.8",
+    "spatie/phpunit-watcher": "^1.23",
+    "yoast/phpunit-polyfills": "^1.1.0"
+  },
+  "require": {
+    "php": ">=7.4",
+    "composer/installers": "^1.0 || ^2.0"
+  },
+  "scripts": {
+    "format": "phpcbf --standard=phpcs.xml.dist --report-summary --report-source",
+    "lint": "phpcs --standard=phpcs.xml.dist",
+    "test": "phpunit",
+    "test:watch": "phpunit-watcher watch < /dev/tty"
+  }
+}
