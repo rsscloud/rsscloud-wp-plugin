@@ -21,7 +21,7 @@
     "test:php": "npm-run-all lint:php test:unit:php",
     "test:unit:php:setup": "wp-env --config .wp-env.test.json start",
     "test:unit:php:setup:debug": "wp-env --config .wp-env.test.json start --xdebug",
-    "test:unit:php:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose",
+    "test:unit:php:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose --testdox",
     "test:unit:php": "npm-run-all test:unit:php:setup test:unit:php:base",
     "test:unit:php:debug": "npm-run-all test:unit:php:setup:debug test:unit:php:base"
   }
