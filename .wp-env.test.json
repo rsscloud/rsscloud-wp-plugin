@@ -3,9 +3,12 @@
   "testsEnvironment": false,
   "port": 8889,
   "core": "WordPress/WordPress#6.3",
-  "plugins": ["."],
+  "plugins": ["./rsscloud"],
   "config": {
     "WP_DEBUG": false,
     "SCRIPT_DEBUG": false
+  },
+  "mappings": {
+    "wp-content/plugins/rsscloud-dev": "."
   }
 }

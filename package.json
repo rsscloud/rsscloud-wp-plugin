@@ -15,18 +15,18 @@
   "scripts": {
     "lint:php:setup": "wp-env start",
     "preformat:php": "npm-run-all lint:php:setup other:update-packages:php",
-    "format:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer run-script format",
+    "format:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud-dev' cli composer run-script format",
     "prelint:php": "npm-run-all lint:php:setup other:update-packages:php",
-    "lint:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer run-script lint",
-    "other:update-packages:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud' cli composer update --no-interaction",
+    "lint:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud-dev' cli composer run-script lint",
+    "other:update-packages:php": "wp-env run --env-cwd='wp-content/plugins/rsscloud-dev' cli composer update --no-interaction",
     "test:php": "npm-run-all lint:php test:unit:php",
     "test:unit:php:setup": "wp-env --config .wp-env.test.json start",
     "test:unit:php:setup:debug": "wp-env --config .wp-env.test.json start --xdebug",
-    "test:unit:php:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose --testdox",
+    "test:unit:php:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud-dev' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose --testdox",
     "test:unit:php": "npm-run-all test:unit:php:setup test:unit:php:base",
     "test:unit:php:debug": "npm-run-all test:unit:php:setup:debug test:unit:php:base",
     "test:unit:php:setup:coverage": "wp-env --config .wp-env.test.json start --xdebug=coverage",
-    "test:unit:php:coverage:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose --coverage-html coverage --coverage-clover coverage/clover.xml",
+    "test:unit:php:coverage:base": "wp-env --config .wp-env.test.json run --env-cwd='wp-content/plugins/rsscloud-dev' wordpress vendor/bin/phpunit -c phpunit.xml.dist --verbose --coverage-html coverage --coverage-clover coverage/clover.xml",
     "test:unit:php:coverage": "npm-run-all test:unit:php:setup:coverage test:unit:php:coverage:base"
   }
 }
