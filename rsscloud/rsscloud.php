@@ -51,7 +51,7 @@ function rsscloud_query_vars( $vars ) {
 add_action( 'parse_request', 'rsscloud_parse_request' );
 function rsscloud_parse_request( $wp ) {
 	if ( array_key_exists( 'rsscloud', $wp->query_vars ) ) {
-		if ( $wp->query_vars['rsscloud'] == 'notify' ) {
+		if ( 'notify' === $wp->query_vars['rsscloud'] ) {
 			rsscloud_hub_process_notification_request();
 		}
 
