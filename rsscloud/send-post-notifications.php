@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 function rsscloud_send_post_notifications( $rss2_url = false ) {
-	if ( $rss2_url === false ) {
+	if ( false === $rss2_url ) {
 		$rss2_url = get_bloginfo( 'rss2_url' );
 		if ( defined( 'RSSCLOUD_FEED_URL' ) ) {
 			$rss2_url = RSSCLOUD_FEED_URL;
@@ -20,11 +20,11 @@ function rsscloud_send_post_notifications( $rss2_url = false ) {
 
 	$need_update = false;
 	foreach ( $notify[ $rss2_url ] as $notify_url => $n ) {
-		if ( $n['status'] != 'active' ) {
+		if ( 'active' !== $n['status'] ) {
 			continue;
 		}
 
-		if ( $n['protocol'] == 'http-post' ) {
+		if ( 'http-post' === $n['protocol'] ) {
 			$url  = parse_url( $notify_url );
 			$port = 80;
 			if ( ! empty( $url['port'] ) ) {

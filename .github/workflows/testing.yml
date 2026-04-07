@@ -18,6 +18,25 @@ jobs:
         with:
           build-dir: "./rsscloud"
 
+  phpcs:
+    name: Coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: cs2pr
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --standard=phpcs.xml.dist -q --report-checkstyle | cs2pr
+
   phpunit:
     name: Run tests
     runs-on: ubuntu-latest

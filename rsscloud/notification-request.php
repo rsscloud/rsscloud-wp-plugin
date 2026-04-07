@@ -35,7 +35,7 @@ function rsscloud_hub_process_notification_request() {
 	}
 
 	$path = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['path'] ) ) );
-	if ( $path[0] != '/' ) {
+	if ( '/' !== $path[0] ) {
 		$path = '/' . $path;
 	}
 
@@ -95,7 +95,7 @@ function rsscloud_hub_process_notification_request() {
 
 	// challenge must match for domain requests
 	if ( ! empty( $_POST['domain'] ) ) {
-		if ( empty( $result['body'] ) || $result['body'] != $challenge ) {
+		if ( empty( $result['body'] ) || $result['body'] !== $challenge ) {
 			rsscloud_notify_result( 'false', 'The response body did not match the challenge string' );
 		}
 	}
@@ -107,7 +107,7 @@ function rsscloud_hub_process_notification_request() {
 		}
 
 		// Only allow requests for the RSS2 posts feed
-		if ( $feed_url != $rss2_url ) {
+		if ( $feed_url !== $rss2_url ) {
 			rsscloud_notify_result( 'false', "You can only request updates for {$rss2_url}" );
 		}
 
