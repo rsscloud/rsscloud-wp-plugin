@@ -1,9 +1,11 @@
-=== Plugin Name ===
+=== RSS Cloud ===
 Contributors: josephscott, automattic
 Tags: rss
 Requires at least: 2.8
-Tested up to: 6.1.1
+Tested up to: 6.9
 Stable tag: 0.5.0
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
 

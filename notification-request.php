@@ -1,5 +1,10 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 function rsscloud_hub_process_notification_request() {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing -- Public RSSCloud hub endpoint, not a WP admin form.
 	// Get the current set of notifications
 	$notify = rsscloud_get_hub_notifications();
 	if ( empty( $notify ) ) {
@@ -13,7 +18,7 @@ function rsscloud_hub_process_notification_request() {
 
 	// Only support http-post
 	$protocol = 'http-post';
-	if ( ! empty( $_POST['protocol'] ) && strtolower( $_POST['protocol'] ) !== 'http-post' ) {
+	if ( ! empty( $_POST['protocol'] ) && strtolower( sanitize_text_field( wp_unslash( $_POST['protocol'] ) ) ) !== 'http-post' ) {
 		do_action( 'rsscloud_protocol_not_post' );
 		rsscloud_notify_result( 'false', 'Only http-post notifications are supported at this time.' );
 	}
@@ -29,7 +34,7 @@ function rsscloud_hub_process_notification_request() {
 		rsscloud_notify_result( 'false', 'No path provided.' );
 	}
 
-	$path = str_replace( '@', '', $_POST['path'] );
+	$path = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['path'] ) ) );
 	if ( $path[0] != '/' ) {
 		$path = '/' . $path;
 	}
@@ -40,10 +45,11 @@ function rsscloud_hub_process_notification_request() {
 		$rss2_url = RSSCLOUD_FEED_URL;
 	}
 
-	$notify_url = $_SERVER['REMOTE_ADDR'] . ':' . $port . $path;
+	$remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$notify_url  = $remote_addr . ':' . $port . $path;
 
 	if ( ! empty( $_POST['domain'] ) ) {
-		$domain     = str_replace( '@', '', $_POST['domain'] );
+		$domain     = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['domain'] ) ) );
 		$notify_url = $domain . ':' . $port . $path;
 		if ( false === strpos( $notify_url, 'http://' ) ) {
 			$notify_url = 'http://' . $notify_url;
@@ -52,7 +58,7 @@ function rsscloud_hub_process_notification_request() {
 		$challenge = rsscloud_generate_challenge();
 
 		$result = wp_safe_remote_get(
-			$notify_url . '?url=' . esc_url( $_POST['url1'] ) . '&challenge=' . $challenge,
+			$notify_url . '?url=' . esc_url( sanitize_url( wp_unslash( $_POST['url1'] ) ) ) . '&challenge=' . $challenge,
 			array(
 				'method'     => 'GET',
 				'timeout'    => RSSCLOUD_HTTP_TIMEOUT,
@@ -72,7 +78,7 @@ function rsscloud_hub_process_notification_request() {
 				'timeout'    => RSSCLOUD_HTTP_TIMEOUT,
 				'user-agent' => RSSCLOUD_USER_AGENT,
 				'port'       => $port,
-				'body'       => array( 'url' => $_POST['url1'] ),
+				'body'       => array( 'url' => sanitize_url( wp_unslash( $_POST['url1'] ) ) ),
 			)
 		);
 	}
@@ -114,4 +120,5 @@ function rsscloud_hub_process_notification_request() {
 
 	rsscloud_update_hub_notifications( $notify );
 	rsscloud_notify_result( 'true', 'Registration successful.' );
+	// phpcs:enable WordPress.Security.NonceVerification.Missing
 } // function rsscloud_hub_notify

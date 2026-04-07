@@ -6,7 +6,12 @@ Description: Ping RSS Cloud servers
 Version: 0.5.0
 Author: Joseph Scott
 Author URI: http://josephscott.org/
+License: GPL-2.0-or-later
  */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 // Uncomment this to not use cron to send out notifications
 // define( 'RSSCLOUD_NOTIFICATIONS_INSTANT', true );
@@ -55,17 +60,12 @@ function rsscloud_parse_request( $wp ) {
 }
 
 function rsscloud_notify_result( $success, $msg ) {
-	$success = strip_tags( $success );
-	$success = ent2ncr( $success );
-	$success = esc_html( $success );
-
-	$msg = strip_tags( $msg );
-	$msg = ent2ncr( $msg );
-	$msg = esc_html( $msg );
+	$success = esc_attr( ent2ncr( wp_strip_all_tags( $success ) ) );
+	$msg     = esc_attr( ent2ncr( wp_strip_all_tags( $msg ) ) );
 
 	header( 'Content-Type: text/xml' );
 	echo "<?xml version='1.0'?>\n";
-	echo "<notifyResult success='{$success}' msg='{$msg}' />\n";
+	echo "<notifyResult success='" . esc_attr( $success ) . "' msg='" . esc_attr( $msg ) . "' />\n";
 	exit;
 }
 
@@ -86,8 +86,8 @@ function rsscloud_add_rss_cloud_element() {
 
 	$cloud['host'] = strtolower( $cloud['host'] );
 
-	echo "<cloud domain='{$cloud['host']}' port='{$cloud['port']}'";
-	echo " path='{$cloud['path']}' registerProcedure=''";
+	echo "<cloud domain='" . esc_attr( $cloud['host'] ) . "' port='" . esc_attr( $cloud['port'] ) . "'";
+	echo " path='" . esc_attr( $cloud['path'] ) . "' registerProcedure=''";
 	echo " protocol='http-post' />";
 	echo "\n";
 }
@@ -101,7 +101,7 @@ function rsscloud_generate_challenge( $length = 30 ) {
 		$string = bin2hex( openssl_random_pseudo_bytes( $length / 2 ) );
 	} else {
 		for ( $i = 0; $i < $length; $i++ ) {
-			$string .= $chars[ mt_rand( 0, $chars_length - 1 ) ];
+			$string .= $chars[ wp_rand( 0, $chars_length - 1 ) ];
 		}
 	}
 
