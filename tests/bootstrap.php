@@ -26,6 +26,29 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 require_once "{$_tests_dir}/includes/functions.php";
 
 /**
+ * Exception used to capture rsscloud_notify_result() calls in tests
+ * instead of calling exit().
+ */
+class RsscloudNotifyResultException extends Exception {
+	public $success;
+	public $msg;
+
+	public function __construct( $success, $msg ) {
+		$this->success = $success;
+		$this->msg     = $msg;
+		parent::__construct( "notify_result: success=$success msg=$msg" );
+	}
+}
+
+/**
+ * Test-friendly override of rsscloud_notify_result() that throws
+ * instead of calling exit.
+ */
+function rsscloud_notify_result( $success, $msg ) {
+	throw new RsscloudNotifyResultException( $success, $msg );
+}
+
+/**
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
