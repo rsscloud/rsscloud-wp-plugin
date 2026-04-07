@@ -18,6 +18,10 @@ function rsscloud_send_post_notifications( $rss2_url = false ) {
 		$notify = array();
 	}
 
+	if ( ! isset( $notify[ $rss2_url ] ) ) {
+		return;
+	}
+
 	$need_update = false;
 	foreach ( $notify[ $rss2_url ] as $notify_url => $n ) {
 		if ( 'active' !== $n['status'] ) {
