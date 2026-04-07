@@ -16,12 +16,7 @@
 	</testsuites>
 	<coverage processUncoveredFiles="true">
 		<include>
-			<directory suffix=".php">.</directory>
+			<directory suffix=".php">./rsscloud</directory>
 		</include>
-		<exclude>
-			<directory>./tests</directory>
-			<directory>./vendor</directory>
-			<directory>./node_modules</directory>
-		</exclude>
 	</coverage>
 </phpunit>
