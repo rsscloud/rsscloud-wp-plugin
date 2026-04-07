@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 function rsscloud_send_post_notifications( $rss2_url = false ) {
 	if ( $rss2_url === false ) {
 		$rss2_url = get_bloginfo( 'rss2_url' );

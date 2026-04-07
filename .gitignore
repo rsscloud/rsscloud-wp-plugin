@@ -13,6 +13,7 @@ coverage
 .phpunit.result.cache
 .reassure
 .dev-ready
+plugin-check-results.txt
 
 
 # Directories/files that may appear in your environment

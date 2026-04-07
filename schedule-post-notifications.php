@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 add_action( 'publish_post', 'rsscloud_schedule_post_notifications' );
 function rsscloud_schedule_post_notifications() {
