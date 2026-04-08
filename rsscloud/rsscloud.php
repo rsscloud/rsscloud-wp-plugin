@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 Plugin Name: RSS Cloud
 Plugin URI:
 Description: Ping RSS Cloud servers
-Version: 0.5.0
+Version: 0.5.1
 Author: Joseph Scott
 Author URI: http://josephscott.org/
  */
@@ -15,7 +15,7 @@ Author URI: http://josephscott.org/
 # define( 'RSSCLOUD_NOTIFICATIONS_INSTANT', true );
 
 if ( !defined( 'RSSCLOUD_USER_AGENT' ) )
-	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.0' );
+	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.1' );
 
 if ( !defined( 'RSSCLOUD_MAX_FAILURES' ) )
 	define( 'RSSCLOUD_MAX_FAILURES', 5 );
