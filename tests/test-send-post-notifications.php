@@ -274,4 +274,32 @@ class SendPostNotificationsTest extends WP_UnitTestCase {
 
 		$this->assertTrue( $fired );
 	}
+
+	public function test_nonstandard_port_not_rejected_by_url_validation() {
+		// Call the same function the plugin uses to send notifications,
+		// without mocking HTTP, to verify URL validation accepts non-standard ports.
+		$url    = 'http://web04.geekity.com:4000/feedupdated';
+		$result = wp_remote_post(
+			$url,
+			array(
+				'method'     => 'POST',
+				'timeout'    => 5,
+				'user-agent' => RSSCLOUD_USER_AGENT,
+				'port'       => 4000,
+				'body'       => array( 'url' => $this->feed_url ),
+			)
+		);
+
+		// The request may fail for network reasons, but must NOT fail
+		// due to URL validation rejecting the non-standard port.
+		if ( is_wp_error( $result ) ) {
+			$this->assertStringNotContainsString(
+				'A valid URL was not provided',
+				$result->get_error_message(),
+				'Non-standard port should not be rejected by URL validation.'
+			);
+		} else {
+			$this->assertIsArray( $result );
+		}
+	}
 }
