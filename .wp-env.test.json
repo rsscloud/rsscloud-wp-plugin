@@ -2,8 +2,9 @@
   "$schema": "https://schemas.wp.org/trunk/wp-env.json",
   "testsEnvironment": false,
   "port": 8889,
-  "core": "WordPress/WordPress#6.3",
+  "core": "WordPress/WordPress#7.0-branch",
   "plugins": ["./rsscloud"],
+  "phpVersion": "7.4",
   "config": {
     "WP_DEBUG": false,
     "SCRIPT_DEBUG": false
