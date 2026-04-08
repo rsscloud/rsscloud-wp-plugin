@@ -3,7 +3,7 @@
 Plugin Name: RSS Cloud
 Plugin URI:
 Description: Ping RSS Cloud servers
-Version: 0.5.0
+Version: 0.5.1
 Author: Joseph Scott
 Author URI: http://josephscott.org/
 License: GPL-2.0-or-later
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // define( 'RSSCLOUD_NOTIFICATIONS_INSTANT', true );
 
 if ( ! defined( 'RSSCLOUD_USER_AGENT' ) ) {
-	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.0' );
+	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.1' );
 }
 
 if ( ! defined( 'RSSCLOUD_MAX_FAILURES' ) ) {
@@ -79,7 +79,7 @@ function rsscloud_add_rss_cloud_element() {
 
 	$cloud = parse_url( get_option( 'home' ) . '/?rsscloud=notify' );
 
-	$cloud['port'] = (int) $cloud['port'];
+	$cloud['port'] = isset( $cloud['port'] ) ? (int) $cloud['port'] : 0;
 	if ( empty( $cloud['port'] ) ) {
 		$cloud['port'] = 80;
 	}

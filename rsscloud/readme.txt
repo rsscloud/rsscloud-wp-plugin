@@ -2,8 +2,8 @@
 Contributors: josephscott, automattic
 Tags: rss
 Requires at least: 2.8
-Tested up to: 6.9
-Stable tag: 0.5.0
+Tested up to: 7.0
+Stable tag: 0.5.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,6 +14,9 @@ Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
 Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
 
 == Changelog ==
+
+= 0.5.1 =
+* Fix loose comparisons to use strict equality operators per WordPress coding standards
 
 = 0.5.0 =
 * Updates to support PHP 8+
