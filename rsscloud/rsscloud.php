@@ -59,14 +59,16 @@ function rsscloud_parse_request( $wp ) {
 	}
 }
 
-function rsscloud_notify_result( $success, $msg ) {
-	$success = esc_attr( ent2ncr( wp_strip_all_tags( $success ) ) );
-	$msg     = esc_attr( ent2ncr( wp_strip_all_tags( $msg ) ) );
+if ( ! function_exists( 'rsscloud_notify_result' ) ) {
+	function rsscloud_notify_result( $success, $msg ) {
+		$success = esc_attr( ent2ncr( wp_strip_all_tags( $success ) ) );
+		$msg     = esc_attr( ent2ncr( wp_strip_all_tags( $msg ) ) );
 
-	header( 'Content-Type: text/xml' );
-	echo "<?xml version='1.0'?>\n";
-	echo "<notifyResult success='" . esc_attr( $success ) . "' msg='" . esc_attr( $msg ) . "' />\n";
-	exit;
+		header( 'Content-Type: text/xml' );
+		echo "<?xml version='1.0'?>\n";
+		echo "<notifyResult success='" . esc_attr( $success ) . "' msg='" . esc_attr( $msg ) . "' />\n";
+		exit;
+	}
 }
 
 add_action( 'rss2_head', 'rsscloud_add_rss_cloud_element' );
