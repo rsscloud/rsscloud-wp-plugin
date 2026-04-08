@@ -50,12 +50,12 @@ function rsscloud_hub_process_notification_request( ) {
 
 		$challenge = rsscloud_generate_challenge( );
 
-		$result = wp_safe_remote_get( $notify_url . '?url=' . esc_url( wp_unslash( $_POST['url1'] ) ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
+		$result = wp_remote_get( $notify_url . '?url=' . esc_url( wp_unslash( $_POST['url1'] ) ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
 	} else {
 		if ( false === strpos( $notify_url, 'http://' ) )
 			$notify_url = 'http://' . $notify_url;
 
-		$result = wp_safe_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => esc_url_raw( wp_unslash( $_POST['url1'] ) ) ) ) );
+		$result = wp_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => esc_url_raw( wp_unslash( $_POST['url1'] ) ) ) ) );
 	}
 
 	if ( is_wp_error( $result ) )

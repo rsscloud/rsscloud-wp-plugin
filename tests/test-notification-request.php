@@ -534,4 +534,44 @@ class NotificationRequestTest extends WP_UnitTestCase {
 		$notify = rsscloud_get_hub_notifications();
 		$this->assertArrayHasKey( 'http://callback.example.com:9000/notify', $notify[ $this->feed_url ] );
 	}
+
+	public function test_domain_based_nonstandard_port_not_rejected_by_url_validation() {
+		// No pre_http_request mock — let the real HTTP layer run so
+		// wp_http_validate_url is exercised. With a non-standard port,
+		// wp_safe_remote_get rejects the URL before any network call.
+		$_POST = array(
+			'url1'   => $this->feed_url,
+			'port'   => '4000',
+			'path'   => '/feedupdated',
+			'domain' => 'web04.geekity.com',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		// The request may fail for network reasons (e.g. connection refused),
+		// but it must NOT fail because of URL validation.
+		$this->assertStringNotContainsString(
+			'A valid URL was not provided',
+			$result->msg,
+			'Non-standard port should not be rejected by URL validation.'
+		);
+	}
+
+	public function test_ip_based_nonstandard_port_not_rejected_by_url_validation() {
+		// No pre_http_request mock — exercise real URL validation.
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '4000',
+			'path'     => '/feedupdated',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertStringNotContainsString(
+			'A valid URL was not provided',
+			$result->msg,
+			'Non-standard port should not be rejected by URL validation.'
+		);
+	}
 }

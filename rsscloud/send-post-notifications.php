@@ -30,7 +30,7 @@ function rsscloud_send_post_notifications( $rss2_url = false ) {
 			if ( !empty( $url['port'] ) )
 				$port = $url['port'];
 
-			$result = wp_safe_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => $rss2_url ) ) );
+			$result = wp_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => $rss2_url ) ) );
 
 			do_action( 'rsscloud_send_notification' );
 
