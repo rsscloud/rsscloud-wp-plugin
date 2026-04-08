@@ -4,7 +4,7 @@
   "port": 8889,
   "core": "WordPress/WordPress#7.0-branch",
   "plugins": ["./rsscloud"],
-  "phpVersion": "7.4",
+  "phpVersion": "8.2",
   "config": {
     "WP_DEBUG": false,
     "SCRIPT_DEBUG": false

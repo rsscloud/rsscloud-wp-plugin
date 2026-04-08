@@ -235,6 +235,29 @@ class NotificationRequestTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'Error testing notification URL', $result->msg );
 	}
 
+	public function test_non_standard_wp_error_returns_error() {
+		add_filter(
+			'pre_http_request',
+			function () {
+				return new WP_Error( 'http_request_not_valid', 'A valid URL was not provided.' );
+			},
+			10,
+			3
+		);
+
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => '/rpc',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'false', $result->success );
+		$this->assertStringContainsString( 'Error', $result->msg );
+	}
+
 	public function test_http_status_error_returns_error() {
 		$this->mock_http_response( 500 );
 
@@ -322,6 +345,141 @@ class NotificationRequestTest extends WP_UnitTestCase {
 		$this->call_process_notification_request();
 
 		$this->assertTrue( $fired );
+	}
+
+	public function test_post_data_is_unslashed() {
+		$this->mock_http_response( 200 );
+
+		// WordPress adds magic quotes to superglobals. A path containing
+		// an apostrophe like /subscriber's would be slashed to /subscriber\'s.
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => "/subscriber's",
+		);
+
+		// Simulate WordPress magic quotes.
+		$_POST = wp_slash( $_POST );
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'true', $result->success );
+
+		$notify     = rsscloud_get_hub_notifications();
+		$sub_urls   = array_keys( $notify[ $this->feed_url ] );
+		$notify_url = $sub_urls[0];
+
+		// After proper wp_unslash(), the backslash before the apostrophe
+		// added by magic quotes should be removed.
+		$this->assertStringNotContainsString( "\\'", $notify_url,
+			'Path should be unslashed to remove magic quote artifacts' );
+		$this->assertStringContainsString( "subscriber's", $notify_url,
+			'Path should preserve the original apostrophe' );
+	}
+
+	public function test_missing_remote_addr_handles_gracefully() {
+		$this->mock_http_response( 200 );
+
+		unset( $_SERVER['REMOTE_ADDR'] );
+
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => '/rpc',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'false', $result->success,
+			'Should reject registration when REMOTE_ADDR is not available' );
+	}
+
+	public function test_empty_remote_addr_does_not_create_broken_notify_url() {
+		$this->mock_http_response( 200 );
+
+		$_SERVER['REMOTE_ADDR'] = '';
+
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => '/rpc',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'false', $result->success,
+			'Should reject registration when REMOTE_ADDR is empty' );
+	}
+
+	public function test_url1_is_unslashed_before_feed_comparison() {
+		$this->mock_http_response( 200 );
+
+		// Use a feed URL containing an apostrophe.
+		$custom_feed = "http://example.org/?feed=rss2&author=O'Brien";
+		add_filter(
+			'feed_link',
+			function ( $output, $feed ) use ( $custom_feed ) {
+				if ( 'rss2' === $feed ) {
+					return $custom_feed;
+				}
+				return $output;
+			},
+			10,
+			2
+		);
+
+		$_POST = array(
+			'url1'     => $custom_feed,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => '/rpc',
+		);
+
+		// Simulate WordPress magic quotes — apostrophe gets backslash-escaped.
+		$_POST = wp_slash( $_POST );
+
+		$result = $this->call_process_notification_request();
+
+		// Without wp_unslash, the slashed url1 won't match $rss2_url
+		// and the function returns "You can only request updates for...".
+		$this->assertSame( 'true', $result->success,
+			'url1 should be unslashed before comparing to feed URL' );
+	}
+
+	public function test_url1_sent_to_subscriber_is_unslashed() {
+		$this->mock_http_response( 200 );
+
+		$custom_feed = "http://example.org/?feed=rss2&author=O'Brien";
+		add_filter(
+			'feed_link',
+			function ( $output, $feed ) use ( $custom_feed ) {
+				if ( 'rss2' === $feed ) {
+					return $custom_feed;
+				}
+				return $output;
+			},
+			10,
+			2
+		);
+
+		$_POST = array(
+			'url1'     => $custom_feed,
+			'protocol' => 'http-post',
+			'port'     => '80',
+			'path'     => '/rpc',
+		);
+
+		$_POST = wp_slash( $_POST );
+
+		$this->call_process_notification_request();
+
+		// The URL sent to the subscriber callback should be the clean URL,
+		// not the magic-quoted version with backslashes.
+		$this->assertSame( $custom_feed, $this->http_requests[0]['args']['body']['url'],
+			'Subscriber should receive the unslashed feed URL' );
 	}
 
 	public function test_http_post_protocol_is_accepted() {

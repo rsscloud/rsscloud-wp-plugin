@@ -1,46 +1,38 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /*
 Plugin Name: RSS Cloud
 Plugin URI:
 Description: Ping RSS Cloud servers
-Version: 0.5.1
+Version: 0.5.0
 Author: Joseph Scott
 Author URI: http://josephscott.org/
-License: GPL-2.0-or-later
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 // Uncomment this to not use cron to send out notifications
-// define( 'RSSCLOUD_NOTIFICATIONS_INSTANT', true );
+# define( 'RSSCLOUD_NOTIFICATIONS_INSTANT', true );
 
-if ( ! defined( 'RSSCLOUD_USER_AGENT' ) ) {
-	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.1' );
-}
+if ( !defined( 'RSSCLOUD_USER_AGENT' ) )
+	define( 'RSSCLOUD_USER_AGENT', 'WordPress/RSSCloud 0.5.0' );
 
-if ( ! defined( 'RSSCLOUD_MAX_FAILURES' ) ) {
+if ( !defined( 'RSSCLOUD_MAX_FAILURES' ) )
 	define( 'RSSCLOUD_MAX_FAILURES', 5 );
-}
 
-if ( ! defined( 'RSSCLOUD_HTTP_TIMEOUT' ) ) {
+if ( !defined( 'RSSCLOUD_HTTP_TIMEOUT' ) )
 	define( 'RSSCLOUD_HTTP_TIMEOUT', 3 );
-}
 
-require __DIR__ . '/data-storage.php';
+require dirname( __FILE__ ) . '/data-storage.php';
 
-if ( ! function_exists( 'rsscloud_hub_process_notification_request' ) ) {
-	require __DIR__ . '/notification-request.php';
-}
+if ( !function_exists( 'rsscloud_hub_process_notification_request' ) )
+	require dirname( __FILE__ ) . '/notification-request.php';
 
-if ( ! function_exists( 'rsscloud_schedule_post_notifications' ) ) {
-	require __DIR__ . '/schedule-post-notifications.php';
-}
+if ( !function_exists( 'rsscloud_schedule_post_notifications' ) )
+	require dirname( __FILE__ ) . '/schedule-post-notifications.php';
 
-if ( ! function_exists( 'rsscloud_send_post_notifications' ) ) {
-	require __DIR__ . '/send-post-notifications.php';
-}
+if ( !function_exists( 'rsscloud_send_post_notifications' ) )
+	require dirname( __FILE__ ) . '/send-post-notifications.php';
 
 add_filter( 'query_vars', 'rsscloud_query_vars' );
 function rsscloud_query_vars( $vars ) {
@@ -51,42 +43,43 @@ function rsscloud_query_vars( $vars ) {
 add_action( 'parse_request', 'rsscloud_parse_request' );
 function rsscloud_parse_request( $wp ) {
 	if ( array_key_exists( 'rsscloud', $wp->query_vars ) ) {
-		if ( 'notify' === $wp->query_vars['rsscloud'] ) {
-			rsscloud_hub_process_notification_request();
-		}
+		if ( $wp->query_vars['rsscloud'] == 'notify' )
+			rsscloud_hub_process_notification_request( );
 
 		exit;
 	}
 }
 
-if ( ! function_exists( 'rsscloud_notify_result' ) ) {
-	function rsscloud_notify_result( $success, $msg ) {
-		$success = esc_attr( ent2ncr( wp_strip_all_tags( $success ) ) );
-		$msg     = esc_attr( ent2ncr( wp_strip_all_tags( $msg ) ) );
+if ( !function_exists( 'rsscloud_notify_result' ) ) {
+function rsscloud_notify_result( $success, $msg ) {
+	$success = strip_tags( $success );
+	$success = ent2ncr( $success );
+	$success = esc_html( $success );
 
-		header( 'Content-Type: text/xml' );
-		echo "<?xml version='1.0'?>\n";
-		echo "<notifyResult success='" . esc_attr( $success ) . "' msg='" . esc_attr( $msg ) . "' />\n";
-		exit;
-	}
+	$msg = strip_tags( $msg );
+	$msg = ent2ncr( $msg );
+	$msg = esc_html( $msg );
+
+	header( 'Content-Type: text/xml' );
+	echo "<?xml version='1.0'?>\n";
+	echo "<notifyResult success='{$success}' msg='{$msg}' />\n";
+	exit;
+}
 }
 
 add_action( 'rss2_head', 'rsscloud_add_rss_cloud_element' );
-function rsscloud_add_rss_cloud_element() {
-	if ( ! is_feed() ) {
+function rsscloud_add_rss_cloud_element( ) {
+	if ( !is_feed() ) {
 		return;
 	}
 
 	$cloud = parse_url( get_option( 'home' ) . '/?rsscloud=notify' );
 
-	$cloud['port'] = isset( $cloud['port'] ) ? (int) $cloud['port'] : 0;
-	if ( empty( $cloud['port'] ) ) {
-		$cloud['port'] = 80;
-	}
+	$cloud['port'] = isset( $cloud['port'] ) ? (int) $cloud['port'] : 80;
 
-	$cloud['path'] .= "?{$cloud['query']}";
+	$cloud['path']	.= "?{$cloud['query']}";
 
-	$cloud['host'] = strtolower( $cloud['host'] );
+	$cloud['host']	= strtolower( $cloud['host'] );
 
 	echo "<cloud domain='" . esc_attr( $cloud['host'] ) . "' port='" . esc_attr( $cloud['port'] ) . "'";
 	echo " path='" . esc_attr( $cloud['path'] ) . "' registerProcedure=''";
@@ -95,17 +88,17 @@ function rsscloud_add_rss_cloud_element() {
 }
 
 function rsscloud_generate_challenge( $length = 30 ) {
-	$chars        = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-	$chars_length = strlen( $chars );
+    $chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    $chars_length = strlen( $chars );
 
-	$string = '';
+    $string = '';
 	if ( function_exists( 'openssl_random_pseudo_bytes' ) ) {
 		$string = bin2hex( openssl_random_pseudo_bytes( $length / 2 ) );
 	} else {
-		for ( $i = 0; $i < $length; $i++ ) {
+	    for ( $i = 0; $i < $length; $i++ ) {
 			$string .= $chars[ wp_rand( 0, $chars_length - 1 ) ];
 		}
 	}
 
-	return $string;
+    return $string;
 }
