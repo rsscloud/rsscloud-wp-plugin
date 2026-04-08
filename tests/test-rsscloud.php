@@ -76,6 +76,28 @@ class RsscloudTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( "port='" . $port . "'", $output );
 	}
 
+	public function test_add_rss_cloud_element_escapes_attribute_values() {
+		$this->go_to( get_feed_link( 'rss2' ) );
+
+		// Override home AFTER go_to so is_feed() still works.
+		add_filter(
+			'option_home',
+			function () {
+				return 'http://example.com:8080/path?a=1&b=2';
+			}
+		);
+
+		ob_start();
+		rsscloud_add_rss_cloud_element();
+		$output = ob_get_clean();
+
+		// With proper escaping, '&' in attribute values should become '&amp;'.
+		$this->assertStringNotContainsString( '&b=2', $output,
+			'Attribute values must be escaped; raw & should not appear' );
+		$this->assertStringContainsString( '&amp;', $output,
+			'Attribute values should use esc_attr() which converts & to &amp;' );
+	}
+
 	public function test_parse_request_does_nothing_without_rsscloud_var() {
 		$wp             = new stdClass();
 		$wp->query_vars = array( 'p' => '1' );

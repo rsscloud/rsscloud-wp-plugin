@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 /*
 Plugin Name: RSS Cloud
 Plugin URI:
@@ -47,6 +50,7 @@ function rsscloud_parse_request( $wp ) {
 	}
 }
 
+if ( !function_exists( 'rsscloud_notify_result' ) ) {
 function rsscloud_notify_result( $success, $msg ) {
 	$success = strip_tags( $success );
 	$success = ent2ncr( $success );
@@ -61,6 +65,7 @@ function rsscloud_notify_result( $success, $msg ) {
 	echo "<notifyResult success='{$success}' msg='{$msg}' />\n";
 	exit;
 }
+}
 
 add_action( 'rss2_head', 'rsscloud_add_rss_cloud_element' );
 function rsscloud_add_rss_cloud_element( ) {
@@ -70,16 +75,14 @@ function rsscloud_add_rss_cloud_element( ) {
 
 	$cloud = parse_url( get_option( 'home' ) . '/?rsscloud=notify' );
 
-	$cloud['port']		= (int) $cloud['port'];
-	if ( empty( $cloud['port'] ) )
-		$cloud['port'] = 80;
+	$cloud['port'] = isset( $cloud['port'] ) ? (int) $cloud['port'] : 80;
 
 	$cloud['path']	.= "?{$cloud['query']}";
 
 	$cloud['host']	= strtolower( $cloud['host'] );
 
-	echo "<cloud domain='{$cloud['host']}' port='{$cloud['port']}'";
-	echo " path='{$cloud['path']}' registerProcedure=''";
+	echo "<cloud domain='" . esc_attr( $cloud['host'] ) . "' port='" . esc_attr( $cloud['port'] ) . "'";
+	echo " path='" . esc_attr( $cloud['path'] ) . "' registerProcedure=''";
 	echo " protocol='http-post' />";
 	echo "\n";
 }
@@ -93,7 +96,7 @@ function rsscloud_generate_challenge( $length = 30 ) {
 		$string = bin2hex( openssl_random_pseudo_bytes( $length / 2 ) );
 	} else {
 	    for ( $i = 0; $i < $length; $i++ ) {
-			$string .= $chars[mt_rand( 0, $chars_length - 1)];
+			$string .= $chars[ wp_rand( 0, $chars_length - 1 ) ];
 		}
 	}
 

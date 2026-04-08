@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 function rsscloud_hub_process_notification_request( ) {
 	// Get the current set of notifications
 	$notify = rsscloud_get_hub_notifications( );
@@ -11,7 +14,7 @@ function rsscloud_hub_process_notification_request( ) {
 
 	// Only support http-post
 	$protocol = 'http-post';
-	if ( !empty( $_POST['protocol'] ) && strtolower( $_POST['protocol'] ) !== 'http-post' ) {
+	if ( !empty( $_POST['protocol'] ) && strtolower( sanitize_text_field( wp_unslash( $_POST['protocol'] ) ) ) !== 'http-post' ) {
 		do_action( 'rsscloud_protocol_not_post' );
 		rsscloud_notify_result( 'false', 'Only http-post notifications are supported at this time.' );
 	}
@@ -25,7 +28,7 @@ function rsscloud_hub_process_notification_request( ) {
 	if ( empty( $_POST['path'] ) )
 		rsscloud_notify_result( 'false', 'No path provided.' );
 
-	$path = str_replace( '@', '', $_POST['path'] );
+	$path = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['path'] ) ) );
 	if ( $path[0] != '/' )
 		$path = '/' . $path;
 
@@ -34,26 +37,29 @@ function rsscloud_hub_process_notification_request( ) {
 	if ( defined( 'RSSCLOUD_FEED_URL' ) )
 		$rss2_url = RSSCLOUD_FEED_URL;
 
-	$notify_url = $_SERVER['REMOTE_ADDR'] . ':' . $port . $path;
+	if ( empty( $_POST['domain'] ) && empty( $_SERVER['REMOTE_ADDR'] ) )
+		rsscloud_notify_result( 'false', 'No domain provided and REMOTE_ADDR is not available.' );
+
+	$notify_url = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) . ':' . $port . $path;
 
 	if ( !empty( $_POST['domain'] ) ) {
-		$domain = str_replace( '@', '', $_POST['domain'] );
+		$domain = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['domain'] ) ) );
 		$notify_url = $domain . ':' . $port . $path;
 		if ( false === strpos( $notify_url, 'http://' ) )
 			$notify_url = 'http://' . $notify_url;
 
 		$challenge = rsscloud_generate_challenge( );
 
-		$result = wp_safe_remote_get( $notify_url . '?url=' . esc_url( $_POST['url1'] ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
+		$result = wp_safe_remote_get( $notify_url . '?url=' . esc_url( wp_unslash( $_POST['url1'] ) ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
 	} else {
 		if ( false === strpos( $notify_url, 'http://' ) )
 			$notify_url = 'http://' . $notify_url;
 
-		$result = wp_safe_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => $_POST['url1'] ) ) );
+		$result = wp_safe_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => esc_url_raw( wp_unslash( $_POST['url1'] ) ) ) ) );
 	}
 
-	if ( isset( $result->errors['http_request_failed'][0] ) )
-		rsscloud_notify_result( 'false', 'Error testing notification URL : ' . $result->errors['http_request_failed'][0] );
+	if ( is_wp_error( $result ) )
+		rsscloud_notify_result( 'false', 'Error testing notification URL : ' . $result->get_error_message() );
 
 	$status_code = (int) $result['response']['code'];
 
@@ -71,6 +77,8 @@ function rsscloud_hub_process_notification_request( ) {
 	foreach ( $_POST as $key => $feed_url ) {
 		if ( !preg_match( '|url\d+|', $key ) )
 			continue;
+
+		$feed_url = esc_url_raw( wp_unslash( $feed_url ) );
 
 		// Only allow requests for the RSS2 posts feed
 		if ( $feed_url != $rss2_url )

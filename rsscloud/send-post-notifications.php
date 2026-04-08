@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 function rsscloud_send_post_notifications( $rss2_url = false ) {
 	if ( $rss2_url === false ) {
 		$rss2_url = get_bloginfo( 'rss2_url' );
@@ -12,6 +15,9 @@ function rsscloud_send_post_notifications( $rss2_url = false ) {
 	$notify = rsscloud_get_hub_notifications( );
 	if ( !is_array( $notify ) )
 		$notify = array( );
+
+	if ( !isset( $notify[$rss2_url] ) )
+		return;
 
 	$need_update = false;
 	foreach ( $notify[$rss2_url] as $notify_url => $n ) {

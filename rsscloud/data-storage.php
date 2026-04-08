@@ -1,4 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 if ( !function_exists( 'rsscloud_get_hub_notifications' ) ) {
 	function rsscloud_get_hub_notifications( ) {
 		return get_option( 'rsscloud_hub_notifications' );
