@@ -574,4 +574,73 @@ class NotificationRequestTest extends WP_UnitTestCase {
 			'Non-standard port should not be rejected by URL validation.'
 		);
 	}
+
+	public function test_port_443_uses_https_scheme_for_domain_based() {
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) {
+				$this->http_requests[] = array(
+					'url'  => $url,
+					'args' => $args,
+				);
+				$query = wp_parse_url( $url, PHP_URL_QUERY );
+				parse_str( $query, $params );
+				return array(
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+					'body'     => isset( $params['challenge'] ) ? $params['challenge'] : '',
+				);
+			},
+			10,
+			3
+		);
+
+		$_POST = array(
+			'url1'   => $this->feed_url,
+			'port'   => '443',
+			'path'   => '/rpc',
+			'domain' => 'subscriber.example.com',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'true', $result->success );
+		$this->assertCount( 1, $this->http_requests );
+		$this->assertStringStartsWith(
+			'https://subscriber.example.com:443/rpc',
+			$this->http_requests[0]['url'],
+			'Port 443 should use https scheme and keep the :443 in the URL'
+		);
+
+		$notify = rsscloud_get_hub_notifications();
+		$this->assertArrayHasKey(
+			'https://subscriber.example.com:443/rpc',
+			$notify[ $this->feed_url ]
+		);
+	}
+
+	public function test_port_443_uses_https_scheme_for_ip_based() {
+		$this->mock_http_response( 200 );
+
+		$_POST = array(
+			'url1'     => $this->feed_url,
+			'protocol' => 'http-post',
+			'port'     => '443',
+			'path'     => '/rpc',
+		);
+
+		$result = $this->call_process_notification_request();
+
+		$this->assertSame( 'true', $result->success );
+		$this->assertStringStartsWith(
+			'https://192.168.1.100:443/rpc',
+			$this->http_requests[0]['url'],
+			'Port 443 should use https scheme for IP-based registration too'
+		);
+
+		$notify = rsscloud_get_hub_notifications();
+		$this->assertArrayHasKey( 'https://192.168.1.100:443/rpc', $notify[ $this->feed_url ] );
+	}
 }
