@@ -275,31 +275,36 @@ class SendPostNotificationsTest extends WP_UnitTestCase {
 		$this->assertTrue( $fired );
 	}
 
-	public function test_nonstandard_port_not_rejected_by_url_validation() {
-		// Call the same function the plugin uses to send notifications,
-		// without mocking HTTP, to verify URL validation accepts non-standard ports.
-		$url    = 'http://web04.geekity.com:4000/feedupdated';
-		$result = wp_remote_post(
-			$url,
-			array(
-				'method'     => 'POST',
-				'timeout'    => 5,
-				'user-agent' => RSSCLOUD_USER_AGENT,
-				'port'       => 4000,
-				'body'       => array( 'url' => $this->feed_url ),
+	public function test_nonstandard_port_is_whitelisted_for_url_validation() {
+		// No pre_http_request mock — we want wp_http_validate_url to run so
+		// the plugin's http_allowed_safe_ports filter gets applied. Hook at
+		// priority 999 to observe what the validator sees.
+		$observed_ports = array();
+		add_filter(
+			'http_allowed_safe_ports',
+			function ( $ports ) use ( &$observed_ports ) {
+				$observed_ports = $ports;
+				return $ports;
+			},
+			999
+		);
+
+		// TEST-NET-3 IP (RFC 5737) — wp_http_validate_url skips DNS for
+		// literal IPs and reaches the port check where our filter fires.
+		$this->set_notifications(
+			$this->build_notifications(
+				array(
+					'notify_url' => 'http://203.0.113.5:4000/feedupdated',
+				)
 			)
 		);
 
-		// The request may fail for network reasons, but must NOT fail
-		// due to URL validation rejecting the non-standard port.
-		if ( is_wp_error( $result ) ) {
-			$this->assertStringNotContainsString(
-				'A valid URL was not provided',
-				$result->get_error_message(),
-				'Non-standard port should not be rejected by URL validation.'
-			);
-		} else {
-			$this->assertIsArray( $result );
-		}
+		rsscloud_send_post_notifications( $this->feed_url );
+
+		$this->assertContains(
+			4000,
+			$observed_ports,
+			'Plugin should add the subscriber port to http_allowed_safe_ports before sending.'
+		);
 	}
 }

@@ -44,6 +44,12 @@ function rsscloud_hub_process_notification_request( ) {
 
 	$scheme = ( 443 === $port ) ? 'https://' : 'http://';
 
+	$allow_port = function ( $ports ) use ( $port ) {
+		$ports[] = $port;
+		return $ports;
+	};
+	add_filter( 'http_allowed_safe_ports', $allow_port );
+
 	if ( !empty( $_POST['domain'] ) ) {
 		$domain = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['domain'] ) ) );
 		$notify_url = $domain . ':' . $port . $path;
@@ -52,13 +58,15 @@ function rsscloud_hub_process_notification_request( ) {
 
 		$challenge = rsscloud_generate_challenge( );
 
-		$result = wp_remote_get( $notify_url . '?url=' . esc_url( wp_unslash( $_POST['url1'] ) ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
+		$result = wp_safe_remote_get( $notify_url . '?url=' . esc_url( wp_unslash( $_POST['url1'] ) ) . '&challenge=' . $challenge, array( 'method' => 'GET', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, ) );
 	} else {
 		if ( false === strpos( $notify_url, '://' ) )
 			$notify_url = $scheme . $notify_url;
 
-		$result = wp_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => esc_url_raw( wp_unslash( $_POST['url1'] ) ) ) ) );
+		$result = wp_safe_remote_post( $notify_url, array( 'method' => 'POST', 'timeout' => RSSCLOUD_HTTP_TIMEOUT, 'user-agent' => RSSCLOUD_USER_AGENT, 'port' => $port, 'body' => array( 'url' => esc_url_raw( wp_unslash( $_POST['url1'] ) ) ) ) );
 	}
+
+	remove_filter( 'http_allowed_safe_ports', $allow_port );
 
 	if ( is_wp_error( $result ) )
 		rsscloud_notify_result( 'false', 'Error testing notification URL : ' . $result->get_error_message() );

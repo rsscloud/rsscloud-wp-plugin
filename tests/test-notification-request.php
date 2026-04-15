@@ -535,43 +535,39 @@ class NotificationRequestTest extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'http://callback.example.com:9000/notify', $notify[ $this->feed_url ] );
 	}
 
-	public function test_domain_based_nonstandard_port_not_rejected_by_url_validation() {
-		// No pre_http_request mock — let the real HTTP layer run so
-		// wp_http_validate_url is exercised. With a non-standard port,
-		// wp_safe_remote_get rejects the URL before any network call.
+	public function test_nonstandard_port_is_whitelisted_for_url_validation() {
+		// No pre_http_request mock — wp_http_validate_url only runs when the
+		// request isn't short-circuited, and that's where
+		// http_allowed_safe_ports gets applied. Hook it at priority 999 so
+		// we observe what the plugin handed to the validator.
+		$observed_ports = array();
+		add_filter(
+			'http_allowed_safe_ports',
+			function ( $ports ) use ( &$observed_ports ) {
+				$observed_ports = $ports;
+				return $ports;
+			},
+			999
+		);
+
+		// Use a TEST-NET-3 IP (RFC 5737) so wp_http_validate_url skips DNS
+		// and reaches the port check where our filter runs.
 		$_POST = array(
 			'url1'   => $this->feed_url,
 			'port'   => '4000',
 			'path'   => '/feedupdated',
-			'domain' => 'web04.geekity.com',
+			'domain' => '203.0.113.5',
 		);
 
-		$result = $this->call_process_notification_request();
+		// Request will fail at the network layer (connection refused); we
+		// don't care about the outcome, only that validation was reached
+		// with our port whitelisted.
+		$this->call_process_notification_request();
 
-		// The request may fail for network reasons (e.g. connection refused),
-		// but it must NOT fail because of URL validation.
-		$this->assertStringNotContainsString(
-			'A valid URL was not provided',
-			$result->msg,
-			'Non-standard port should not be rejected by URL validation.'
-		);
-	}
-
-	public function test_ip_based_nonstandard_port_not_rejected_by_url_validation() {
-		// No pre_http_request mock — exercise real URL validation.
-		$_POST = array(
-			'url1'     => $this->feed_url,
-			'protocol' => 'http-post',
-			'port'     => '4000',
-			'path'     => '/feedupdated',
-		);
-
-		$result = $this->call_process_notification_request();
-
-		$this->assertStringNotContainsString(
-			'A valid URL was not provided',
-			$result->msg,
-			'Non-standard port should not be rejected by URL validation.'
+		$this->assertContains(
+			4000,
+			$observed_ports,
+			'Plugin should add the subscriber port to http_allowed_safe_ports before sending.'
 		);
 	}
 
