@@ -2,7 +2,7 @@
 Contributors: josephscott, automattic
 Tags: rss
 Requires at least: 2.8
-Tested up to: 6.1.1
+Tested up to: 7.0.0
 Stable tag: 0.5.1
 
 Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
@@ -14,11 +14,10 @@ Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
 == Changelog ==
 
 = 0.5.1 =
-* Add direct file access protection to all PHP files
-* Escape attribute values in the RSS cloud element output
-* Sanitize and unslash all $_POST and $_SERVER input in notification requests
-* Validate REMOTE_ADDR before using it for IP-based subscriptions
-* Replace mt_rand() with wp_rand() in challenge generation
+* Harden plugin files against direct access and escape values in the cloud element output                                     
+* Allow notifications to subscribers using non-standard ports                                                                   
+* More reliable detection of failed notification requests
+* Reject subscription requests with no domain when the remote address is unavailable                                          
 
 = 0.5.0 =
 * Updates to support PHP 8+

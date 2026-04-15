@@ -14,7 +14,7 @@ function rsscloud_hub_process_notification_request( ) {
 
 	// Only support http-post
 	$protocol = 'http-post';
-	if ( !empty( $_POST['protocol'] ) && strtolower( sanitize_text_field( wp_unslash( $_POST['protocol'] ) ) ) !== 'http-post' ) {
+	if ( !empty( $_POST['protocol'] ) && strtolower( $_POST['protocol'] ) !== 'http-post' ) {
 		do_action( 'rsscloud_protocol_not_post' );
 		rsscloud_notify_result( 'false', 'Only http-post notifications are supported at this time.' );
 	}
@@ -40,7 +40,7 @@ function rsscloud_hub_process_notification_request( ) {
 	if ( empty( $_POST['domain'] ) && empty( $_SERVER['REMOTE_ADDR'] ) )
 		rsscloud_notify_result( 'false', 'No domain provided and REMOTE_ADDR is not available.' );
 
-	$notify_url = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) . ':' . $port . $path;
+	$notify_url = $_SERVER['REMOTE_ADDR'] . ':' . $port . $path;
 
 	if ( !empty( $_POST['domain'] ) ) {
 		$domain = str_replace( '@', '', sanitize_text_field( wp_unslash( $_POST['domain'] ) ) );

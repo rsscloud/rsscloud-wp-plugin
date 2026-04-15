@@ -96,7 +96,7 @@ function rsscloud_generate_challenge( $length = 30 ) {
 		$string = bin2hex( openssl_random_pseudo_bytes( $length / 2 ) );
 	} else {
 	    for ( $i = 0; $i < $length; $i++ ) {
-			$string .= $chars[ wp_rand( 0, $chars_length - 1 ) ];
+			$string .= $chars[wp_rand( 0, $chars_length - 1)];
 		}
 	}
 
