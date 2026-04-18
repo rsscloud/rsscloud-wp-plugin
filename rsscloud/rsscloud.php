@@ -75,7 +75,11 @@ function rsscloud_add_rss_cloud_element( ) {
 
 	$cloud = parse_url( get_option( 'home' ) . '/?rsscloud=notify' );
 
-	$cloud['port'] = isset( $cloud['port'] ) ? (int) $cloud['port'] : 80;
+	if ( isset( $cloud['port'] ) ) {
+		$cloud['port'] = (int) $cloud['port'];
+	} else {
+		$cloud['port'] = ( isset( $cloud['scheme'] ) && 'https' === $cloud['scheme'] ) ? 443 : 80;
+	}
 
 	$cloud['path']	.= "?{$cloud['query']}";
 

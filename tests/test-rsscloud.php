@@ -76,6 +76,24 @@ class RsscloudTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( "port='" . $port . "'", $output );
 	}
 
+	public function test_add_rss_cloud_element_defaults_port_to_443_for_https_home() {
+		$this->go_to( get_feed_link( 'rss2' ) );
+
+		// Override home AFTER go_to so is_feed() still works.
+		add_filter(
+			'option_home',
+			function () {
+				return 'https://example.com';
+			}
+		);
+
+		ob_start();
+		rsscloud_add_rss_cloud_element();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( "port='443'", $output );
+	}
+
 	public function test_add_rss_cloud_element_escapes_attribute_values() {
 		$this->go_to( get_feed_link( 'rss2' ) );
 
