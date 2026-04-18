@@ -14,10 +14,12 @@ Adds RSSCloud ( http://rsscloud.co/ ) capabilities to your RSS feed.
 == Changelog ==
 
 = 0.5.1 =
-* Harden plugin files against direct access and escape values in the cloud element output                                     
-* Allow notifications to subscribers using non-standard ports                                                                   
+* Harden plugin files against direct access and escape values in the cloud element output
+* Allow notifications to subscribers using non-standard ports
+* Allow notifications to https subscribers if port 443 is specified
 * More reliable detection of failed notification requests
-* Reject subscription requests with no domain when the remote address is unavailable                                          
+* Reject subscription requests with no domain when the remote address is unavailable
+* Use port 443 in cloud tag when site is https                                       
 
 = 0.5.0 =
 * Updates to support PHP 8+
